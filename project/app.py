@@ -51,7 +51,7 @@ def dropdown_success():
     st.success("Review successfully added!")
     st.session_state.flag = 'none'
 
-def rating_update(game_name):
+def rank_update(game_name):
     c.execute("SELECT COUNT(*) FROM reviews WHERE game_name = ? AND game_review_prediction = 'Positive'", (game_name,))
     p_c = c.fetchall()
     positive_count = int(p_c[0][0])
@@ -246,7 +246,7 @@ def display_reviews_adv():
             c.execute(f"DELETE FROM reviews WHERE id IN ({selected_ids})")
             conn.commit()
 
-            rating_update(game_name[0][0])
+            rank_update(game_name[0][0])
 
             st.session_state.flag = 'delete_review_success'
 
@@ -340,7 +340,7 @@ def tester_page():
     elif st.session_state.flag == 'dropdown_review_warning':
         dropdown_review_warning()
     elif st.session_state.flag == 'dropdown_success':
-        rating_update(selected_option)
+        rank_update(selected_option)
         dropdown_success()
 
     display_reviews()
