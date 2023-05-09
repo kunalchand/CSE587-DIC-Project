@@ -12,7 +12,8 @@ import pandas as pd
 # pip install scikit-learn
 # pip install pysqlite3
 # git bash or open cmd in the same directory
-# streamlit run app.py
+# chmod +x run.sh
+# ./run.sh {Deletes game_review_database.db and executes "streamlit run app.py"}
 
 def warning():
     st.warning("Game already exists!")
@@ -49,6 +50,22 @@ def dropdown_review_warning():
 def dropdown_success():
     st.success("Review successfully added!")
     st.session_state.flag = 'none'
+
+def rating_update(game_name):
+    c.execute("SELECT COUNT(*) FROM reviews WHERE game_name = ? AND game_review_prediction = 'Positive'", (game_name,))
+    p_c = c.fetchall()
+    positive_count = int(p_c[0][0])
+
+    c.execute("SELECT COUNT(*) FROM reviews WHERE game_name = ? AND game_review_prediction = 'Negative'", (game_name,))
+    n_c = c.fetchall()
+    negative_count = int(n_c[0][0])
+
+    new_rank = 0
+    if (positive_count + negative_count) != 0:
+        new_rank = (positive_count - (negative_count * 0.5))/(positive_count + negative_count)
+    
+    c.execute('UPDATE games SET game_rank = ? WHERE game_name = ?',(new_rank, game_name))
+    conn.commit()
 
 def table_setup():
     if not c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='games'").fetchone():
@@ -222,10 +239,15 @@ def display_reviews_adv():
 
     if st.button("Delete Selected Reviews"):
         if(len(selected_options) > 0):
+            c.execute(f'SELECT game_name FROM reviews WHERE id IN (?)', (selected_options[0],))
+            game_name = c.fetchall()
+
             selected_ids = ','.join(map(str, selected_options))
             c.execute(f"DELETE FROM reviews WHERE id IN ({selected_ids})")
             conn.commit()
-        
+
+            rating_update(game_name[0][0])
+
             st.session_state.flag = 'delete_review_success'
 
             st.session_state.page = 'admin'
@@ -318,6 +340,7 @@ def tester_page():
     elif st.session_state.flag == 'dropdown_review_warning':
         dropdown_review_warning()
     elif st.session_state.flag == 'dropdown_success':
+        rating_update(selected_option)
         dropdown_success()
 
     display_reviews()
