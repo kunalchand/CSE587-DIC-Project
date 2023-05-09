@@ -38,10 +38,22 @@ def success_review_deletion():
     st.success("Reviews successfully deleted!")
     st.session_state.flag = 'none'
 
+def dropdown_game_warning():
+    st.warning("Please select a game!")
+    st.session_state.flag = 'none'
+
+def dropdown_review_warning():
+    st.warning("Please write a review!")
+    st.session_state.flag = 'none'
+
+def dropdown_success():
+    st.success("Review successfully added!")
+    st.session_state.flag = 'none'
+
 def table_setup():
     if not c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='games'").fetchone():
         c.execute("CREATE TABLE games (id INTEGER PRIMARY KEY, game_name TEXT, game_rank REAL)")
-        c.execute("INSERT INTO games (game_name, game_rank) VALUES (?, ?)", ('Game A', 0.5))
+        c.execute("INSERT INTO games (game_name, game_rank) VALUES (?, ?)", ('Game A', 0.25))
         c.execute("INSERT INTO games (game_name, game_rank) VALUES (?, ?)", ('Game B', 1))
         c.execute("INSERT INTO games (game_name, game_rank) VALUES (?, ?)", ('Game C', 0))
         conn.commit()
@@ -49,8 +61,8 @@ def table_setup():
     if not c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='reviews'").fetchone():
         c.execute("CREATE TABLE reviews (id INTEGER PRIMARY KEY, game_name TEXT, game_review TEXT, game_review_prediction TEXT)")
         c.execute("INSERT INTO reviews (game_name, game_review, game_review_prediction) VALUES (?, ?, ?)", ('Game A', 'This game is amazing!', 'Positive'))
-        c.execute("INSERT INTO reviews (game_name, game_review, game_review_prediction) VALUES (?, ?, ?)", ('Game A', 'Bad Game', 'Negative'))
-        c.execute("INSERT INTO reviews (game_name, game_review, game_review_prediction) VALUES (?, ?, ?)", ('Game B', 'Insane Game', 'Positive'))
+        c.execute("INSERT INTO reviews (game_name, game_review, game_review_prediction) VALUES (?, ?, ?)", ('Game A', 'Extremely disappointed. It did not meet my expectations at all.', 'Negative'))
+        c.execute("INSERT INTO reviews (game_name, game_review, game_review_prediction) VALUES (?, ?, ?)", ('Game B', 'Love this Game', 'Positive'))
         conn.commit()
 
 def display_games():
@@ -267,22 +279,47 @@ def tester_page():
 
     st.title("Tester Page")
 
+    options = ['Select a game']
+
+    c.execute("SELECT game_name FROM games")
+    game_list = c.fetchall()
+
+    for game in game_list:
+        options.append(game[0])
+
+    selected_option = st.selectbox('Choose a game to give review about:', options)
+
     # Add an input field for the tester to enter text review
     review = st.text_input("Enter your review:")
 
     # Add a button to trigger the analysis
-    if st.button("Analyze"):
-        # Use the loaded model to predict the sentiment of the input review
-        file_name = open("vectorizer.pkl", "rb")
-        vectorizer = pickle.load(file_name)
-        prediction = model.predict(vectorizer.transform([review]))
+    if st.button("Submit and Analyze"):
+        if selected_option == 'Select a game':
+            st.session_state.flag = 'dropdown_game_warning'
+        else:
+            if review == '':
+                st.session_state.flag = 'dropdown_review_warning'
+            else:
+                # Use the loaded model to predict the sentiment of the input review
+                file_name = open("vectorizer.pkl", "rb")
+                vectorizer = pickle.load(file_name)
+                prediction = model.predict(vectorizer.transform([review]))
 
-        # Display the predicted sentiment
-        if prediction[0] == 'Positive':
-            st.write("The review is Positive.")
-        elif prediction[0] == 'Negative':
-            st.write("The review is Negative.")
+                c.execute("INSERT INTO reviews (game_name, game_review, game_review_prediction) VALUES (?, ?, ?)", (selected_option, review, prediction[0]))
+                conn.commit()
+
+                st.session_state.flag = 'dropdown_success'
+
+        st.session_state.page = 'tester'
+        st.experimental_rerun()
     
+    if st.session_state.flag == 'dropdown_game_warning':
+        dropdown_game_warning()
+    elif st.session_state.flag == 'dropdown_review_warning':
+        dropdown_review_warning()
+    elif st.session_state.flag == 'dropdown_success':
+        dropdown_success()
+
     display_reviews()
 
 def client_page():
