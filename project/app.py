@@ -246,6 +246,14 @@ def display_games_adv():
     elif st.session_state.flag == 'add_game_success':
         success()
 
+def header(url):
+    st.markdown(f'<p style="background-color: #008080; color: #ffffff; font-weight: bold; font-size: 20px; border-radius: 2%; text-align: center;"> {url}</p>', unsafe_allow_html=True)
+    return url
+
+def cell(url):
+    st.markdown(f'<p style="background-color: #ffc0cb; color: #000000; font-size: 17px; border-radius: 2%; text-align: center; padding: 5px;"> {url}</p>', unsafe_allow_html=True)
+    return url
+
 def display_reviews_adv():
     c.execute("SELECT * FROM reviews")
     data = c.fetchall()
@@ -260,8 +268,25 @@ def display_reviews_adv():
     # Define a list of options
     options = []
     
+    counter = 1
     for row in data:
-        options.append(st.checkbox("GAME NAME ----------------------- [ {} ]\n\nGAME REVIEW -------------------- [ {} ]\n\nGAME REVIEW PREDICTION --- [ {} ]".format(*row[1:])))
+        with st.container():
+            col0, col1, col2, col3 = st.columns(4)
+            with col0:
+                label = "Review {}".format(counter)
+                options.append(st.checkbox(label))
+            with col1:
+                header("Game Name")
+                cell("{}".format(*row[1:]))
+            with col2: 
+                header("Game Review")
+                cell("{}".format(*row[2:]))
+            with col3: 
+                header("Game Review Prediction")
+                cell("{}".format(*row[3:]))
+            st.markdown("---")
+        counter = counter + 1
+        # options.append(st.checkbox("GAME NAME ----------------------- [ {} ]\n\nGAME REVIEW -------------------- [ {} ]\n\nGAME REVIEW PREDICTION --- [ {} ]".format(*row[1:])))
 
     # Define an empty list to hold the selected options
     selected_options = []
