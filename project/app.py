@@ -60,9 +60,7 @@ def score_update(game_name):
     n_c = c.fetchall()
     negative_count = int(n_c[0][0])
 
-    new_score = 0
-    if (positive_count + negative_count) != 0:
-        new_score = (positive_count - (negative_count * 0.5))/(positive_count + negative_count)
+    new_score = positive_count - (negative_count * 0.5)
     
     c.execute('UPDATE games SET game_score = ? WHERE game_name = ?',(new_score, game_name))
     conn.commit()
@@ -70,7 +68,7 @@ def score_update(game_name):
 def table_setup():
     if not c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='games'").fetchone():
         c.execute("CREATE TABLE games (id INTEGER PRIMARY KEY, game_name TEXT, game_score REAL)")
-        c.execute("INSERT INTO games (game_name, game_score) VALUES (?, ?)", ('Game A', 0.25))
+        c.execute("INSERT INTO games (game_name, game_score) VALUES (?, ?)", ('Game A', 0.5))
         c.execute("INSERT INTO games (game_name, game_score) VALUES (?, ?)", ('Game B', 1))
         c.execute("INSERT INTO games (game_name, game_score) VALUES (?, ?)", ('Game C', 0))
         conn.commit()
@@ -82,8 +80,8 @@ def table_setup():
         c.execute("INSERT INTO reviews (game_name, game_review, game_review_prediction) VALUES (?, ?, ?)", ('Game B', 'Love this Game', 'Positive'))
         conn.commit()
 
-def display_games():
-    c.execute("SELECT * FROM games")
+def display_client_games():
+    c.execute("SELECT * FROM games ORDER BY game_score DESC")
     data = c.fetchall()
     
     # Degine headers
@@ -105,7 +103,41 @@ def display_games():
             }
             table th {
                 text-align: center;
-                background-color: #996600;
+                background-color: #003380;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+def display_client_reviews():
+    c.execute("""
+        SELECT games.id, games.game_name, reviews.game_review, reviews.game_review_prediction 
+        FROM games 
+        INNER JOIN reviews 
+        ON games.game_name = reviews.game_name 
+        ORDER BY games.game_score, reviews.game_review_prediction DESC;
+    """)
+    data = c.fetchall()
+    
+    # Degine headers
+    df = pd.DataFrame(data, columns=['ID', 'Game Name', 'Game Review', 'Game Review Prediction'])
+    df = df.set_index('ID')
+    df.index.name = None
+
+    st.write("### Reviews")
+    
+    # Display Table
+    table_html = df.to_html(escape=False, index=False)
+    table_html = table_html.replace('<table', '<table style="width:100%;"')
+    st.write(table_html, unsafe_allow_html=True)
+
+    st.markdown("""
+        <style>
+            table td {
+                text-align: center;
+            }
+            table th {
+                text-align: center;
+                background-color: #803300;
             }
         </style>
     """, unsafe_allow_html=True)
@@ -133,7 +165,7 @@ def display_reviews():
             }
             table th {
                 text-align: center;
-                background-color: #996600;
+                background-color: #99003d;
             }
         </style>
     """, unsafe_allow_html=True)
@@ -354,6 +386,9 @@ def client_page():
 
     st.title("Client Page")
     st.markdown("---")
+
+    display_client_games()
+    display_client_reviews()
 
 if __name__ == '__main__':
     # Reload on any code changes
