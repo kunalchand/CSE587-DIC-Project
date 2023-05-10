@@ -175,7 +175,7 @@ def header(url):
     return url
 
 def cell(url):
-    st.markdown(f'<p style="background-color: #ffc0cb; color: #000000; font-size: 17px; border-radius: 2%; text-align: center; padding: 5px;"> {url}</p>', unsafe_allow_html=True)
+    st.markdown(f'<p style="background-color: #FFC87C; color: #000000; font-size: 17px; border-radius: 2%; text-align: center; padding: 5px;"> {url}</p>', unsafe_allow_html=True)
     return url
 
 def display_games_adv():
