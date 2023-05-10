@@ -114,7 +114,7 @@ def display_client_reviews():
         FROM games 
         INNER JOIN reviews 
         ON games.game_name = reviews.game_name 
-        ORDER BY games.game_score, reviews.game_review_prediction DESC;
+        ORDER BY games.game_score DESC, reviews.game_review_prediction DESC;
     """)
     data = c.fetchall()
     
@@ -179,7 +179,7 @@ def display_games_adv():
     df = df.set_index('ID')
     df.index.name = None
 
-    st.write("### Games Adv")
+    st.write("### Games")
     
     # Define a list of options
     options = []
@@ -255,7 +255,7 @@ def display_reviews_adv():
     df = df.set_index('ID')
     df.index.name = None
 
-    st.write("### Reviews Adv")
+    st.write("### Reviews")
 
     # Define a list of options
     options = []
@@ -295,6 +295,19 @@ def display_reviews_adv():
 
 def home_page():
     st.title("Game Review App")
+
+    # Add custom CSS to style the buttons
+    st.markdown(
+        """
+        <style>
+            .stButton>button {
+                width: 100%;
+                height: 175px;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
     # Add buttons to select user type
     with st.container():
