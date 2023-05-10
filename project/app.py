@@ -170,6 +170,14 @@ def display_reviews():
         </style>
     """, unsafe_allow_html=True)
 
+def header(url):
+    st.markdown(f'<p style="background-color: #008080; color: #ffffff; font-weight: bold; font-size: 20px; border-radius: 2%; text-align: center;"> {url}</p>', unsafe_allow_html=True)
+    return url
+
+def cell(url):
+    st.markdown(f'<p style="background-color: #ffc0cb; color: #000000; font-size: 17px; border-radius: 2%; text-align: center; padding: 5px;"> {url}</p>', unsafe_allow_html=True)
+    return url
+
 def display_games_adv():
     c.execute("SELECT * FROM games")
     data = c.fetchall()
@@ -184,8 +192,22 @@ def display_games_adv():
     # Define a list of options
     options = []
     
+    counter = 1
     for row in data:
-        options.append(st.checkbox("GAME NAME ----------------------- [ {} ]\n\nGAME SCORE ----------------------- [ {} ]".format(*row[1:])))
+        with st.container():
+            col0, col1, col2 = st.columns(3)
+            with col0:
+                label = "Game {}".format(counter)
+                options.append(st.checkbox(label))
+            with col1:
+                header("Game Name")
+                cell("{}".format(*row[1:]))
+            with col2: 
+                header("Game Score")
+                cell("{}".format(*row[2:]))
+            st.markdown("---")
+        counter = counter + 1
+        # options.append(st.checkbox("GAME NAME ----------------------- [ {} ]\n\nGAME SCORE ----------------------- [ {} ]".format(*row[1:])))
 
     # Define an empty list to hold the selected options
     selected_options = []
@@ -245,14 +267,6 @@ def display_games_adv():
         warning()
     elif st.session_state.flag == 'add_game_success':
         success()
-
-def header(url):
-    st.markdown(f'<p style="background-color: #008080; color: #ffffff; font-weight: bold; font-size: 20px; border-radius: 2%; text-align: center;"> {url}</p>', unsafe_allow_html=True)
-    return url
-
-def cell(url):
-    st.markdown(f'<p style="background-color: #ffc0cb; color: #000000; font-size: 17px; border-radius: 2%; text-align: center; padding: 5px;"> {url}</p>', unsafe_allow_html=True)
-    return url
 
 def display_reviews_adv():
     c.execute("SELECT * FROM reviews")
