@@ -240,7 +240,8 @@ def display_games_adv():
     
     
     if st.session_state.flag == 'delete_game_success':
-        success_game_deletion()
+        st.session_state.page = 'home'
+        st.experimental_rerun()
     elif st.session_state.flag == 'delete_game_warning':
         warning_game_deletion()
     
@@ -328,11 +329,19 @@ def display_reviews_adv():
             st.session_state.flag = 'delete_review_warning'
     
     if st.session_state.flag == 'delete_review_success':
-        success_review_deletion()
+        st.session_state.page = 'home'
+        st.experimental_rerun()
     elif st.session_state.flag == 'delete_review_warning':
         warning_review_deletion()
 
 def home_page():
+
+    if st.session_state.flag == 'delete_game_success':
+        success_game_deletion()
+    
+    if st.session_state.flag == 'delete_review_success':
+        success_review_deletion()
+    
     st.title("Game Review App")
 
     # Add custom CSS to style the buttons
