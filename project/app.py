@@ -51,7 +51,7 @@ def dropdown_success():
     st.success("Review successfully added!")
     st.session_state.flag = 'none'
 
-def rank_update(game_name):
+def score_update(game_name):
     c.execute("SELECT COUNT(*) FROM reviews WHERE game_name = ? AND game_review_prediction = 'Positive'", (game_name,))
     p_c = c.fetchall()
     positive_count = int(p_c[0][0])
@@ -60,19 +60,19 @@ def rank_update(game_name):
     n_c = c.fetchall()
     negative_count = int(n_c[0][0])
 
-    new_rank = 0
+    new_score = 0
     if (positive_count + negative_count) != 0:
-        new_rank = (positive_count - (negative_count * 0.5))/(positive_count + negative_count)
+        new_score = (positive_count - (negative_count * 0.5))/(positive_count + negative_count)
     
-    c.execute('UPDATE games SET game_rank = ? WHERE game_name = ?',(new_rank, game_name))
+    c.execute('UPDATE games SET game_score = ? WHERE game_name = ?',(new_score, game_name))
     conn.commit()
 
 def table_setup():
     if not c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='games'").fetchone():
-        c.execute("CREATE TABLE games (id INTEGER PRIMARY KEY, game_name TEXT, game_rank REAL)")
-        c.execute("INSERT INTO games (game_name, game_rank) VALUES (?, ?)", ('Game A', 0.25))
-        c.execute("INSERT INTO games (game_name, game_rank) VALUES (?, ?)", ('Game B', 1))
-        c.execute("INSERT INTO games (game_name, game_rank) VALUES (?, ?)", ('Game C', 0))
+        c.execute("CREATE TABLE games (id INTEGER PRIMARY KEY, game_name TEXT, game_score REAL)")
+        c.execute("INSERT INTO games (game_name, game_score) VALUES (?, ?)", ('Game A', 0.25))
+        c.execute("INSERT INTO games (game_name, game_score) VALUES (?, ?)", ('Game B', 1))
+        c.execute("INSERT INTO games (game_name, game_score) VALUES (?, ?)", ('Game C', 0))
         conn.commit()
 
     if not c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='reviews'").fetchone():
@@ -87,7 +87,7 @@ def display_games():
     data = c.fetchall()
     
     # Degine headers
-    df = pd.DataFrame(data, columns=['ID', 'Game Name', 'Game Rank'])
+    df = pd.DataFrame(data, columns=['ID', 'Game Name', 'Game Score'])
     df = df.set_index('ID')
     df.index.name = None
 
@@ -143,7 +143,7 @@ def display_games_adv():
     data = c.fetchall()
     
     # Degine headers
-    df = pd.DataFrame(data, columns=['ID', 'Game Name', 'Game Rank'])
+    df = pd.DataFrame(data, columns=['ID', 'Game Name', 'Game Score'])
     df = df.set_index('ID')
     df.index.name = None
 
@@ -153,7 +153,7 @@ def display_games_adv():
     options = []
     
     for row in data:
-        options.append(st.checkbox("GAME NAME ----------------------- [ {} ]\n\nGAME RANK ----------------------- [ {} ]".format(*row[1:])))
+        options.append(st.checkbox("GAME NAME ----------------------- [ {} ]\n\nGAME SCORE ----------------------- [ {} ]".format(*row[1:])))
 
     # Define an empty list to hold the selected options
     selected_options = []
@@ -202,7 +202,7 @@ def display_games_adv():
                 st.session_state.flag = 'add_game_warning'
             else:
                 # Insert new game
-                c.execute("INSERT INTO games (game_name, game_rank) VALUES (?, ?)", (new_game,0))
+                c.execute("INSERT INTO games (game_name, game_score) VALUES (?, ?)", (new_game,0))
                 conn.commit()
                 st.session_state.flag = 'add_game_success'
 
@@ -246,7 +246,7 @@ def display_reviews_adv():
             c.execute(f"DELETE FROM reviews WHERE id IN ({selected_ids})")
             conn.commit()
 
-            rank_update(game_name[0][0])
+            score_update(game_name[0][0])
 
             st.session_state.flag = 'delete_review_success'
 
@@ -287,8 +287,8 @@ def admin_page():
         st.experimental_rerun() 
 
     st.title("Admin Page")
-    
     st.markdown("---")
+
     display_games_adv()
     st.markdown("---")
     display_reviews_adv()
@@ -300,6 +300,7 @@ def tester_page():
         st.experimental_rerun() 
 
     st.title("Tester Page")
+    st.markdown("---")
 
     options = ['Select a game']
 
@@ -340,7 +341,7 @@ def tester_page():
     elif st.session_state.flag == 'dropdown_review_warning':
         dropdown_review_warning()
     elif st.session_state.flag == 'dropdown_success':
-        rank_update(selected_option)
+        score_update(selected_option)
         dropdown_success()
 
     display_reviews()
@@ -352,6 +353,7 @@ def client_page():
         st.experimental_rerun() 
 
     st.title("Client Page")
+    st.markdown("---")
 
 if __name__ == '__main__':
     # Reload on any code changes
