@@ -68,16 +68,16 @@ def score_update(game_name):
 def table_setup():
     if not c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='games'").fetchone():
         c.execute("CREATE TABLE games (id INTEGER PRIMARY KEY, game_name TEXT, game_score REAL)")
-        c.execute("INSERT INTO games (game_name, game_score) VALUES (?, ?)", ('Game A', 0.5))
-        c.execute("INSERT INTO games (game_name, game_score) VALUES (?, ?)", ('Game B', 1))
-        c.execute("INSERT INTO games (game_name, game_score) VALUES (?, ?)", ('Game C', 0))
+        c.execute("INSERT INTO games (game_name, game_score) VALUES (?, ?)", ('GTA Vice City', 0.5))
+        c.execute("INSERT INTO games (game_name, game_score) VALUES (?, ?)", ('Freedom Fighters', 1))
+        c.execute("INSERT INTO games (game_name, game_score) VALUES (?, ?)", ('Paladins', 0))
         conn.commit()
 
     if not c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='reviews'").fetchone():
         c.execute("CREATE TABLE reviews (id INTEGER PRIMARY KEY, game_name TEXT, game_review TEXT, game_review_prediction TEXT)")
-        c.execute("INSERT INTO reviews (game_name, game_review, game_review_prediction) VALUES (?, ?, ?)", ('Game A', 'This game is amazing!', 'Positive'))
-        c.execute("INSERT INTO reviews (game_name, game_review, game_review_prediction) VALUES (?, ?, ?)", ('Game A', 'Extremely disappointed. It did not meet my expectations at all.', 'Negative'))
-        c.execute("INSERT INTO reviews (game_name, game_review, game_review_prediction) VALUES (?, ?, ?)", ('Game B', 'Love this Game', 'Positive'))
+        c.execute("INSERT INTO reviews (game_name, game_review, game_review_prediction) VALUES (?, ?, ?)", ('GTA Vice City', 'This game is amazing!', 'Positive'))
+        c.execute("INSERT INTO reviews (game_name, game_review, game_review_prediction) VALUES (?, ?, ?)", ('GTA Vice City', 'Extremely disappointed. It did not meet my expectations at all.', 'Negative'))
+        c.execute("INSERT INTO reviews (game_name, game_review, game_review_prediction) VALUES (?, ?, ?)", ('Freedom Fighters', 'Love this Game', 'Positive'))
         conn.commit()
 
 def display_client_games():
