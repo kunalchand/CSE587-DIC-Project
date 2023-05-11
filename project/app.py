@@ -10,9 +10,12 @@ import pandas as pd
 # pip install streamlit
 # pip install scikit-learn
 # pip install pysqlite3
+# pip install keras
+# pip install tensorflow
 # git bash or open cmd in the same directory
-# chmod +x run.sh
-# ./run.sh {Deletes game_review_database.db and executes "streamlit run app.py"}
+# Execute: chmod +x run.sh (To grant permission)
+# Execute: ./run.sh (For the first time) {This command deletes game_review_database.db and executes "streamlit run app.py"}
+# Execute: streamlit run app.py (From second time onwards)
 
 def warning():
     st.warning("Game already exists!")
@@ -455,7 +458,7 @@ if __name__ == '__main__':
     st.set_option('deprecation.showfileUploaderEncoding', False)
 
     # Load the pre-trained model
-    file_name = open("knn.pkl", "rb")
+    file_name = open("knn.pkl", "rb") # Change to rnn.pkl to use KNN model instead
     model = pickle.load(file_name)
 
     # Database setup
