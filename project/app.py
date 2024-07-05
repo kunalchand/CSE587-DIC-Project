@@ -1,6 +1,6 @@
 import streamlit as st
 import pickle
-import sqlite3
+import pysqlite3
 import pandas as pd
 
 # Intallation Guide
@@ -462,7 +462,7 @@ if __name__ == '__main__':
     model = pickle.load(file_name)
 
     # Database setup
-    conn = sqlite3.connect('game_review_database.db')
+    conn = pysqlite3.connect('game_review_database.db')
     c = conn.cursor()
 
     # Table setup
